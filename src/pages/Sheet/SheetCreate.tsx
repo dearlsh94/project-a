@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import { makeStyles, createStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,49 +12,41 @@ import ImageIcon from '@material-ui/icons/Image';
 
 import TopBar from '../../TopBar';
 import ISheet from '../../models/ISheet';
+import IImage from '../../models/IImage';
 
 import { createSheet } from '../../shared/Firebase';
+import IMetaData from '../../models/IMetadata';
 
-const classes: any = makeStyles(theme => createStyles({
+const styles: any = {
     heroContent: {
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(8, 0, 6),
-        paddingTop: theme.spacing(4),
-        paddingBottom: theme.spacing(4),
-      },
+    },
     paper: {
-      marginTop: theme.spacing(8),
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
     },
-    avatar: {
-      margin: theme.spacing(1),
-      backgroundColor: theme.palette.secondary.main,
-    },
     form: {
       width: '100%', // Fix IE 11 issue.
-      marginTop: theme.spacing(3),
+      marginTop: 10,
     },
-    create: {
-      margin: theme.spacing(3, 0, 2),
-    },
-  }));
+  };
 
 interface IProps{
+    classes: any,
 }
 
 interface IState{
     title: string,
     subTitle: string,
+    singer: string,
     remark: string,
-    file: any,
-    fileUrl: any,
-    fileName: string,
+    images: Array<IImage>,
+    refPath: string,
+    tags: Array<string>,
     isUploaded: Boolean,
 }
 
-export default class SheetCreate extends Component<IProps, IState> {
+class SheetCreate extends Component<IProps, IState> {
 
     constructor(props: IProps) {
         super(props);
@@ -62,10 +54,11 @@ export default class SheetCreate extends Component<IProps, IState> {
         this.state = {
             title: '',
             subTitle: '',
+            singer: '',
             remark: '',
-            file: null,
-            fileUrl: null,
-            fileName: 'please upload file.',
+            images: new Array<IImage>(),
+            refPath: '',
+            tags: [],
             isUploaded: false,
         }
     };
@@ -76,8 +69,8 @@ export default class SheetCreate extends Component<IProps, IState> {
             return false;
         }
             
-        if (this.state.subTitle === '') {
-            alert("Please Input Sub Title");
+        if (this.state.singer === '') {
+            alert("Please Input Singer");
             return false;
         }
         
@@ -101,9 +94,21 @@ export default class SheetCreate extends Component<IProps, IState> {
         });
     };
 
+    handleChangeSinger = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            singer: e.target.value,
+        });
+    };
+
     handleChangeRemark = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({
             remark: e.target.value,
+        });
+    };
+
+    handleChangeRefPath = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            refPath: e.target.value,
         });
     };
 
@@ -111,48 +116,72 @@ export default class SheetCreate extends Component<IProps, IState> {
         this.setState({
             title: '',
             subTitle: '',
+            singer: '',
             remark: '',
-            file: null,
-            fileUrl: null,
-            fileName: 'please upload file.',
+            refPath: '',
+            images: new Array<IImage>(),
             isUploaded: false,
         });  
     };
 
     handleUploadSheetImg = ({target}: any) => {
-        const fileReader = new FileReader();
-        
-        fileReader.readAsDataURL(target.files[0]);
+        const imgs = new Array<IImage>();
 
-        fileReader.onload = () => {
-            this.setState({
-                file: target.files[0],
-                fileUrl: URL.createObjectURL(target.files[0]),
-                fileName: target.files[0].name,
-                isUploaded: true,
-            });
+        for (let i=0; i<target.files.length; i++) {
+            const fileReader = new FileReader();
+
+            fileReader.readAsDataURL(target.files[i]);
+
+            fileReader.onload = () => {
+                const img: IImage = {
+                    idx: i,
+                    file: target.files[i],
+                    fileName: target.files[i].name,
+                    fileUrl: URL.createObjectURL(target.files[i]),
+                }
+
+                console.log(img);
+
+                imgs.push(img);
+
+                if (i === target.files.length-1) {
+                    console.log(imgs);
+                    this.setState({
+                        images: imgs,
+                        isUploaded: true,
+                    });
+                }
+            }
         }
     }
 
     handleCreateSheet = () => {
 
         if (this.checkValidate()) { // true is pass, false is fail.
-            const sheet: ISheet = {
-                key: '',
-                idx: -1,
-                title: this.state.title,
-                subTitle: this.state.subTitle,
-                imageName: this.state.fileName,
-                remark1: this.state.remark,
+            const metadata: IMetaData = {
                 createDate: new Date().getTime(),
                 creater: 'sys',
                 editDate: new Date().getTime(),
-                editer: 'sys', 
+                editer: 'sys',
+                using: true
+            }
+
+            const sheet: ISheet = {
+                key: null,
+                idx: -1,
+                title: this.state.title,
+                subTitle: this.state.subTitle,
+                singer: this.state.singer,
+                images: this.state.images,
+                remark1: this.state.remark,
+                refPath: this.state.refPath,
+                tags: this.state.tags,
+                metadata: metadata
             }
     
             console.log(sheet);
             
-            createSheet(sheet, this.state.fileName, this.state.file);
+            createSheet(sheet);
 
             alert("Success");
         }
@@ -160,7 +189,8 @@ export default class SheetCreate extends Component<IProps, IState> {
     }
 
     render() {
-        const {isUploaded} = this.state;
+        const { classes } = this.props;
+        const {images, isUploaded} = this.state;
 
         return(
             <div>
@@ -199,7 +229,6 @@ export default class SheetCreate extends Component<IProps, IState> {
                                     autoComplete="off"
                                     name="subtitle"
                                     variant="outlined"
-                                    required
                                     fullWidth
                                     id="subtitle"
                                     label="Sub Title"
@@ -210,9 +239,21 @@ export default class SheetCreate extends Component<IProps, IState> {
                                 <Grid item xs={12}>
                                 <TextField
                                     autoComplete="off"
-                                    name="remark"
+                                    name="singer"
                                     variant="outlined"
                                     required
+                                    fullWidth
+                                    id="singer"
+                                    label="Singer"
+                                    onChange={this.handleChangeSinger}
+                                    value={this.state.singer}
+                                />
+                                </Grid>
+                                <Grid item xs={12}>
+                                <TextField
+                                    autoComplete="off"
+                                    name="remark"
+                                    variant="outlined"
                                     fullWidth
                                     id="remark"
                                     label="Remark"
@@ -221,13 +262,26 @@ export default class SheetCreate extends Component<IProps, IState> {
                                 />
                                 </Grid>
                                 <Grid item xs={12}>
+                                <TextField
+                                    autoComplete="off"
+                                    name="refPath"
+                                    variant="outlined"
+                                    fullWidth
+                                    id="refPath"
+                                    label="Reference Path"
+                                    onChange={this.handleChangeRefPath}
+                                    value={this.state.refPath}
+                                />
+                                </Grid>
+                                <Grid item xs={12}>
                                     <input
-                                    color="primary"
-                                    accept="image/*"
-                                    type="file"
-                                    onChange={this.handleUploadSheetImg}
-                                    id="button-sheet-file"
-                                    style={{ display: 'none', }}
+                                        color="primary"
+                                        accept="image/*"
+                                        type="file"
+                                        onChange={this.handleUploadSheetImg}
+                                        id="button-sheet-file"
+                                        style={{ display: 'none', }}
+                                        multiple
                                     />
                                     <label htmlFor="button-sheet-file">
                                     <Button
@@ -246,8 +300,15 @@ export default class SheetCreate extends Component<IProps, IState> {
                                 {isUploaded &&
                                     <Grid item xs={12}>
                                         <Typography>Preview</Typography>
-                                        <img id="sheetImgView" src={this.state.fileUrl} alt={this.state.fileName} width="100%" height="auto"/>
-                                        <Typography>{this.state.fileName}</Typography>
+                                        {
+                                            images.map((image, index) => 
+                                            (
+                                                <div key={index}>
+                                                    <img id={image.idx.toString()} src={image.fileUrl} alt={image.fileName} width="100%" height="auto"/>
+                                                    <Typography>{image.fileName}</Typography>
+                                                </div>
+                                            ))
+                                        }
                                     </Grid>
                                 }
                                 <Grid item xs={12}>
@@ -270,3 +331,5 @@ export default class SheetCreate extends Component<IProps, IState> {
         );
     }
 }
+
+export default withStyles(styles)(SheetCreate);

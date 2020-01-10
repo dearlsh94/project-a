@@ -1,21 +1,31 @@
 import React, {Component} from 'react';
 
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 import TopBar from '../TopBar';
 
-const classes: any = makeStyles(theme => ({
+const styles: any = {
     heroContent: {
-      backgroundColor: theme.palette.background.paper,
-      padding: theme.spacing(8, 0, 6),
+      backgroundColor: "blue",
     },
-  }));
+  };
 
-export default class Home extends Component<{}, {}> {
+interface IProps{
+    classes: any,
+}
+
+interface IState{
+
+}
+
+class Home extends Component<IProps, IState> {
 
     render() {
+        
+        const { classes } = this.props;
+
         return(
             <div>
                 <TopBar
@@ -31,3 +41,5 @@ export default class Home extends Component<{}, {}> {
         );
     }
 }
+
+export default withStyles(styles)(Home);

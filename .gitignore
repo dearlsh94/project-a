@@ -28,4 +28,4 @@ yarn-error.log*
 firebase.json
 database.rules.json
 storage.rules
-/src/shared
+/src/shared/FirebaseConf.tsx

@@ -56,6 +56,12 @@ $npm run start
   $npm i @material-ui/icons
   ```
 
+### image-slider
+
+- ```
+  $npm i react-simple-image-slider
+  ```
+
 
 
 ## 3. Project-A 와 DB 연결 및 Router 설정

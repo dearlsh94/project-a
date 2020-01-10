@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import { makeStyles, createStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -9,26 +9,23 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 
-const classes: any = makeStyles(theme => createStyles({
+const styles: any = {
     root: {
-        display: 'flex',
+        display: 'relative',
     },
     toolbar: {
         paddingRight: 24, // keep right padding when drawer closed
     },
     appBar: {
-        zIndex: theme.zIndex.drawer + 1,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-        }),
+        zIndex: 1,
     },
     title: {
         flexGrow: 1,
     },
-  }));
+  };
 
 interface IProps {
+    classes: any,
     barText: String,
 }
 
@@ -36,10 +33,10 @@ interface IStates {
 
 }
 
-export default class TopBar extends Component<IProps, IStates> {
+class TopBar extends Component<IProps, IStates> {
 
     render() {
-        const {barText} = this.props;
+        const {classes, barText} = this.props;
 
         return(
             <div className={classes.root}>
@@ -59,3 +56,5 @@ export default class TopBar extends Component<IProps, IStates> {
         );
     }
 }
+
+export default withStyles(styles)(TopBar);

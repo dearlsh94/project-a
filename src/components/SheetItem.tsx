@@ -8,7 +8,9 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 
-import ISheet from '../../models/ISheet';
+import ISheet from '../models/ISheet';
+
+import {dwFirstImgSheet} from "../shared/Firebase";
 
 const classes: any = makeStyles(theme => ({
     card: {
@@ -18,6 +20,7 @@ const classes: any = makeStyles(theme => ({
     },
     cardMedia: {
       paddingTop: '56.25%', // 16:9
+      height: 140,
     },
     cardContent: {
       flexGrow: 1,
@@ -29,12 +32,37 @@ interface IProps{
 }
 
 interface IStates{
+    url: string,
 }
 
 export default class SheetItem extends Component<IProps, IStates> {
 
+    constructor(props: IProps) {
+        super(props);
+
+        this.state = {
+            url: "",
+        }
+    }
+
+    componentDidMount() {
+        console.log(this.state.url);
+
+        
+        dwFirstImgSheet(this.props.sheet)
+            .then((_url: any) => {
+                
+                this.setState({
+                    url: _url,
+                })
+                
+            });
+        
+    }
+
     handleView = () => {
-        console.log(this.props.sheet.title + " View");        
+        console.log(this.props.sheet.title + " View");
+        document.location.href="/sheet/view/" + this.props.sheet.key;
     }
 
     handleEdit = () => {
@@ -43,23 +71,27 @@ export default class SheetItem extends Component<IProps, IStates> {
 
     render(){
         const {sheet} = this.props;
+        const {url} = this.state;
 
         return(
             <Card className={classes.card}>
-                <CardMedia
-                    className={classes.cardMedia}
-                    image="https://material-ui.com/static/images/material-ui-logo.svg"
-                    title="Image title"
-                />
+                {url &&
+                    <CardMedia
+                        className={classes.cardMedia}
+                        component="img"
+                        title="Image title"
+                        src={url}
+                    />
+                }
                 <CardContent className={classes.cardContent}>
                     <Typography gutterBottom variant="h5" component="h2">
                         {sheet.title}
                     </Typography>
                     <Typography>
-                        {sheet.subTitle}
+                        {sheet.singer}
                     </Typography>
                     <Typography>
-                        {sheet.imageName}
+                        {sheet.images[0].fileName}
                     </Typography>
                     <Typography>
                         {sheet.remark1}

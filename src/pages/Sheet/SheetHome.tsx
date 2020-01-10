@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import SheetList from './SheetList';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -9,29 +9,30 @@ import Container from '@material-ui/core/Container';
 
 import TopBar from '../../TopBar';
 
-const classes: any = makeStyles(theme => ({
+const styles: any = {
     heroContent: {
-      backgroundColor: theme.palette.background.paper,
-      padding: theme.spacing(8, 0, 6),
-      paddingTop: theme.spacing(4),
-      paddingBottom: theme.spacing(4),
+        content: {
+            padding: 100,
+            paddingTop: 50,
+            paddingBottom: 50,
+          },
     },
     heroButtons: {
-      marginTop: theme.spacing(4),
+      marginTop: 20,
     },
-  }));
+  };
 
-interface ISheetHomeProps {
-
+interface IProps {
+    classes: any,
 }
 
-interface ISheetHomeStates{
+interface IState {
     type: String,
 }
 
-export default class SheetHome extends Component<ISheetHomeProps, ISheetHomeStates> {
+class SheetHome extends Component<IProps, IState> {
 
-    constructor(props: ISheetHomeProps) {
+    constructor(props: IProps) {
         super(props);
         
         this.state = {
@@ -44,6 +45,8 @@ export default class SheetHome extends Component<ISheetHomeProps, ISheetHomeStat
     }
 
     render() {
+        const { classes } = this.props;
+
         return(
             <div>
                 <TopBar
@@ -72,3 +75,5 @@ export default class SheetHome extends Component<ISheetHomeProps, ISheetHomeStat
         );
     }
 }
+
+export default withStyles(styles)(SheetHome);

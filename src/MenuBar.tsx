@@ -7,35 +7,30 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import HomeIcon from '@material-ui/icons/Home';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
 import AssignmentIcon from '@material-ui/icons/Assignment';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 
 const drawerWidth = 240;
 
-const classes: any = makeStyles(theme => ({
+const styles: any = {
     root: {
         display: 'flex',
     },
     drawerPaper: {
-        position: 'relative',
-        whiteSpace: 'nowrap',
-        width: drawerWidth,
-        transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-        }),
+        zIndex: 1100,
     },
-}));
+};
 
 interface IProps {
+    classes: any,
 }
 
 interface IStates {
 }
 
-export default class MenuBar extends Component<IProps, IStates> {
+class MenuBar extends Component<IProps, IStates> {
 
     handleMvHome = () => {
         document.location.href="/";
@@ -49,7 +44,17 @@ export default class MenuBar extends Component<IProps, IStates> {
         document.location.href="/sheet/create";
     }
 
+    handleMvSignUp = () => {
+        document.location.href="/user/signup";
+    }
+    
+    handleMvSignIn = () => {
+        document.location.href="/user/signin";
+    }
+    
     render() {
+        const {classes} = this.props;
+
         return(
             <div className={classes.root}>
                 <Drawer
@@ -78,7 +83,7 @@ export default class MenuBar extends Component<IProps, IStates> {
                   <Divider />
                     <List>
                     <div>
-                        <ListSubheader inset>Developer</ListSubheader>
+                        <ListSubheader inset>Dev Quick Link</ListSubheader>
                         <ListItem button>
                         <ListItemIcon>
                             <AssignmentIcon />
@@ -89,13 +94,13 @@ export default class MenuBar extends Component<IProps, IStates> {
                         <ListItemIcon>
                             <AssignmentIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Menu 2" />
+                        <ListItemText primary="Sign Up" onClick={this.handleMvSignUp}/>
                         </ListItem>
                         <ListItem button>
                         <ListItemIcon>
                             <AssignmentIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Menu 3" />
+                        <ListItemText primary="Sign In" onClick={this.handleMvSignIn}/>
                         </ListItem>
                     </div>
                     </List>
@@ -104,3 +109,5 @@ export default class MenuBar extends Component<IProps, IStates> {
         );
     }
 }
+
+export default withStyles(styles)(MenuBar);

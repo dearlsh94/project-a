@@ -1,39 +1,34 @@
 import React, {Component} from 'react';
 
-import { makeStyles, createStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { getAllSheet } from '../../shared/Firebase';
 
-import SheetItem from './SheetItem';
+import SheetItem from '../../components/SheetItem';
 
 import ISheet from '../../models/ISheet';
 
-const classes: any = makeStyles(theme => createStyles({
-    icon: {
-      marginRight: theme.spacing(2),
-    },
+const styles: any = {
     heroContent: {
-      backgroundColor: theme.palette.background.paper,
-      padding: theme.spacing(8, 0, 6),
+      padding: 100,
     },
     heroButtons: {
-      marginTop: theme.spacing(4),
+      marginTop: 40,
     },
     cardGrid: {
-      paddingTop: theme.spacing(8),
-      paddingBottom: theme.spacing(8),
+      paddingTop: 80,
+      paddingBottom: 80,
     },
     footer: {
-      backgroundColor: theme.palette.background.paper,
-      padding: theme.spacing(6),
+      padding: 60,
     },
-  }));
+  };
 
 interface IProps {
-
+  classes: any,
 }
 
 interface IState {
@@ -41,7 +36,7 @@ interface IState {
   isLoaded: boolean,
 }
 
-export default class SheetList extends Component<IProps, IState> {
+class SheetList extends Component<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
@@ -56,18 +51,26 @@ export default class SheetList extends Component<IProps, IState> {
         console.log("datas", datas);
         const _sheets: Array<ISheet> = [];
 
-        Object.keys(datas.val()).map((key) => {
-          _sheets.push(datas.val()[key]);
-        });
-
-        this.setState({
-          sheets: _sheets,
-          isLoaded: true,
-        });
+        if (datas.val()) {
+          Object.keys(datas.val()).map((key) => {
+            _sheets.push(datas.val()[key]);
+          });
+  
+          this.setState({
+            sheets: _sheets,
+            isLoaded: true,
+          });
+        }
+        else {
+          this.setState({
+            isLoaded: true,
+          });
+        }
       });
   }
 
   render() {
+    const { classes } = this.props;
     const { sheets, isLoaded } = this.state;
 
       return (
@@ -92,3 +95,5 @@ export default class SheetList extends Component<IProps, IState> {
       );  
     }
 }
+
+export default withStyles(styles)(SheetList);
