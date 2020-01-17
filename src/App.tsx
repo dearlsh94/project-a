@@ -14,6 +14,7 @@ import SheetView from './pages/Sheet/SheetView';
 import SignUp from './pages/User/SignUp';
 import SignUpDone from './pages/User/SignUpDone';
 import SignIn from './pages/User/SignIn';
+import Test from './pages/Test';
 
 const styles: any = {
   root: {
@@ -55,10 +56,13 @@ class App extends Component<IProps, IStates> {
                     <Route exact path="/" component={Home}/>
                     <Route exact path="/sheet" component={SheetHome}/>
                     <Route exact path="/sheet/create" component={SheetCreate}/>
+                    <Route path="/sheet/create/:key" component={SheetCreate}/>
                     <Route path="/sheet/view/:key" component={SheetView} />
                     <Route exact path="/user/signup" component={SignUp} />
                     <Route exact path="/user/signup/done" component={SignUpDone} />
                     <Route exact path="/user/signin" component={SignIn} />
+
+                    <Route exact path="/test" component={Test} />
                   </BrowserRouter>
               </Container>
             </main>

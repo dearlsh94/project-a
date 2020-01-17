@@ -22,13 +22,14 @@ let config: IConfig;
  * getSheetByKey : DB Sheet data key 값으로 조회
  * dwFirstImgSheet : DB Sheet에 저장 된 이미지 중 첫 번째 이미지 다운로드
  * createSheet : DB Sheet 생성 (다중 이미지 업로드)
- * createSheetByFile : DB Sheet 생성 (단일 이미지 업로드) -- 미사용
+ * updateSheet : DB Sheet 업데이트 (다중 이미지 업로드)
  * signUpWithEmailAndPassword : Firebase 사용자 등록 (이메일, 비밀번호)
  * signInWithEmailAndPassword : 사용자 로그인 (이메일, 비밀번호)
  * 
  * * non-export
  * addSheetCount : DB Sheet 생성 시 config의 전체 sheet count 증가 후 해당 idx 반환
  * upImgSheet : DB Sheet 생성 시 이미지 storage로 업로드
+ * delImgByIdx : 특정 Sheet IDX 에 저장 된 Stoarge 이미지 삭제
  * 
  */
 
@@ -98,7 +99,7 @@ export const getAllSheet = () => {
 };
 
 export const getSheetByKey = (key: string) => {
-    return new Promise((resolve, reject) => {
+    return new Promise<ISheet>((resolve, reject) => {
         const sheetUrl = fbUrl.SHEET_URL + "/" + key;
 
         console.log(sheetUrl);
@@ -108,7 +109,20 @@ export const getSheetByKey = (key: string) => {
 
                 if (datas.exists()) {
                     console.log(datas.val());
-                    
+                    /*
+                    const sheet: ISheet = {
+                        key: datas.val().key,
+                        idx: datas.val().idx,
+                        title: datas.val().title,
+                        subTitle: datas.val().subTitle,
+                        singer: datas.val().singer,
+                        images: datas.val().images,
+                        remark1: datas.val().remark1,
+                        refPath: datas.val().refPath,
+                        tags: datas.val().tags,
+                        metadata: datas.val().metadata,
+                    }
+                    */
                     resolve(datas.val());
                 }
                 else {
@@ -173,6 +187,20 @@ const upImgSheet = (idx: Number, fileName: string, file: any) => {
     });
 };
 
+const delImgByIdx = (idx: Number) => {
+    return new Promise<boolean>((resolve, reject) => {
+        storage.ref().child(fbUrl.SHEET_IMAGE_URL + "/" + idx).listAll()
+            .then((files) => {
+                files.items.map((file) => {
+                    file.delete();
+                })
+            })
+            .then(() => {
+                resolve(true);
+            });
+    });
+}
+
 export const dwFirstImgSheet = (sheet: ISheet) => {
     // Create a reference with an initial file path and name
     //const pathRef = storage.ref(fbUrl.SHEET_IMAGE_URL + "/" + sheet.idx + "_" + sheet.images[0].fileName);
@@ -219,64 +247,79 @@ export const dwFirstImgSheet = (sheet: ISheet) => {
 }
 
 export const createSheet = (sheet: ISheet) => {
-    let res: boolean = true;
-
+    
     sheet.key = database.ref(fbUrl.SHEET_URL).push().key;
 
-    addSheetCount()
-        .then((idx) => {
-            sheet.idx = Number(idx);
-            database.ref(fbUrl.SHEET_URL + "/" + sheet.key)
-                .set(sheet, () => {
-                    console.log("[S] : CREATED_SHEET ");
-                });
-        })
-        .then(() => {
-            sheet.images.map((image) => {
-                const fileName = image.idx.toString() + "_" + image.fileName;
-                upImgSheet(sheet.idx, fileName, image.file)
-                    .then((downloadURL) => {
-                        // **LSH : update fileUrl data when successed upload.
-                        database.ref(fbUrl.SHEET_URL + "/" + sheet.key + "/images/" + image.idx)
-                            .update({
-                                fileUrl: downloadURL
-                            })
+    return new Promise<boolean>((resolve, reject) => {
+        addSheetCount()
+            .then((idx) => {
+                sheet.idx = Number(idx);
+                database.ref(fbUrl.SHEET_URL + "/" + sheet.key)
+                    .set(sheet, () => {
+                        console.log("[S] : CREATED_SHEET ");
                     });
+            })
+            .then(() => {
+                sheet.images.map((image) => {
+                    const fileName = image.idx.toString() + "_" + image.fileName;
+                    upImgSheet(sheet.idx, fileName, image.file)
+                        .then((downloadURL) => {
+                            // **LSH : fileurl data update to download url from local url when successed upload.
+                            database.ref(fbUrl.SHEET_URL + "/" + sheet.key + "/images/" + image.idx)
+                                .update({
+                                    fileUrl: downloadURL
+                                })
+                        });
+                });
+            })
+            .then(() => {
+                resolve(true);
+            })
+            .catch((err) => {
+                console.log("[E] : NOT_CREATED_SHEET ", err);
+    
+                reject(false);
             });
-        })
-        .catch((err) => {
-            console.log("[E] : NOT_CREATED_SHEET ", err);
 
-            res = false;
-        });
-
-    return res;
+    });
 };
 
-export const createSheetByFile = (sheet: ISheet, fileName: string, file: any) => {
-    let res: boolean = true;
+export const updateSheet = (sheet: ISheet) => {
+    console.log(sheet);
 
-    sheet.key = database.ref(fbUrl.SHEET_URL).push().key;
-
-    addSheetCount()
-        .then((idx) => {
-            sheet.idx = Number(idx);
-            database.ref(fbUrl.SHEET_URL + "/" + sheet.key)
-                .set(sheet, () => {
-                    console.log("[S] : CREATED_SHEET ");
+    return new Promise<boolean>((resolve, reject) => {
+        database.ref(fbUrl.SHEET_URL + "/" + sheet.key)
+            .update(sheet, () => {
+                console.log("[S] : MODIFIED_SHEET ");
+            })
+            .then(() => {
+                delImgByIdx(sheet.idx)
+                    .then(() => {
+                        resolve(true);
+                    });
+            })
+            .then(() => {
+                sheet.images.map((image) => {
+                    const fileName = image.idx.toString() + "_" + image.fileName;
+                    upImgSheet(sheet.idx, fileName, image.file)
+                        .then((downloadURL) => {
+                            // **LSH : fileurl data update to download url from local url when successed upload.
+                            database.ref(fbUrl.SHEET_URL + "/" + sheet.key + "/images/" + image.idx)
+                                .update({
+                                    fileUrl: downloadURL
+                                })
+                        });
                 });
-        })
-        .then(() => {
-            fileName = sheet.idx + "_" + fileName;
-            upImgSheet(sheet.idx, fileName, file);        
-        })
-        .catch((err) => {
-            console.log("[E] : NOT_CREATED_SHEET ", err);
+            })
+            .then(() => {
+                resolve(true);
+            })
+            .catch((err) => {
+                console.log("[E] : NOT_MODIFIED_SHEET ", err);
 
-            res = false;
-        });
-
-    return res;
+                reject(false);
+            });
+    });
 };
 
 export const signUpWithEmailAndPassword = (user: IUser) => {

@@ -52,6 +52,10 @@ class MenuBar extends Component<IProps, IStates> {
         document.location.href="/user/signin";
     }
     
+    handleMvTest = () => {
+        document.location.href="/test";
+    }
+
     render() {
         const {classes} = this.props;
 
@@ -101,6 +105,12 @@ class MenuBar extends Component<IProps, IStates> {
                             <AssignmentIcon />
                         </ListItemIcon>
                         <ListItemText primary="Sign In" onClick={this.handleMvSignIn}/>
+                        </ListItem>
+                        <ListItem button>
+                        <ListItemIcon>
+                            <AssignmentIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Test" onClick={this.handleMvTest}/>
                         </ListItem>
                     </div>
                     </List>

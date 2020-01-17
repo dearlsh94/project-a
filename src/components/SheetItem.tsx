@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -12,7 +12,7 @@ import ISheet from '../models/ISheet';
 
 import {dwFirstImgSheet} from "../shared/Firebase";
 
-const classes: any = makeStyles(theme => ({
+const styles: any = {
     card: {
       height: '100%',
       display: 'flex',
@@ -25,9 +25,10 @@ const classes: any = makeStyles(theme => ({
     cardContent: {
       flexGrow: 1,
     },
-  }));
+  };
 
 interface IProps{
+    classes: any,
     sheet: ISheet
 }
 
@@ -35,7 +36,7 @@ interface IStates{
     url: string,
 }
 
-export default class SheetItem extends Component<IProps, IStates> {
+class SheetItem extends Component<IProps, IStates> {
 
     constructor(props: IProps) {
         super(props);
@@ -46,18 +47,12 @@ export default class SheetItem extends Component<IProps, IStates> {
     }
 
     componentDidMount() {
-        console.log(this.state.url);
-
-        
         dwFirstImgSheet(this.props.sheet)
             .then((_url: any) => {
-                
                 this.setState({
                     url: _url,
                 })
-                
             });
-        
     }
 
     handleView = () => {
@@ -67,10 +62,11 @@ export default class SheetItem extends Component<IProps, IStates> {
 
     handleEdit = () => {
         console.log(this.props.sheet.title + " Edit");    
+        document.location.href="/sheet/create/" + this.props.sheet.key;
     }
 
     render(){
-        const {sheet} = this.props;
+        const {classes, sheet} = this.props;
         const {url} = this.state;
 
         return(
@@ -111,3 +107,5 @@ export default class SheetItem extends Component<IProps, IStates> {
         )
     }
 }
+
+export default withStyles(styles)(SheetItem);

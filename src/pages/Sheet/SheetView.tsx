@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import SimpleImageSlider from "react-simple-image-slider";
 
 import ISheet from '../../models/ISheet';
 
@@ -10,6 +9,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
 import TopBar from '../../TopBar';
+import SheetImgPreview from '../../components/SheetImgPreview';
 
 import { getSheetByKey } from '../../shared/Firebase';
 
@@ -20,10 +20,6 @@ const styles: any = {
       },
   };
 
-interface RSISImage {
-    url: string;
-}
-
 interface IProps {
     classes: any,
     match: any,
@@ -31,7 +27,6 @@ interface IProps {
 interface IStates {
     key: string,
     sheet: ISheet | null,
-    imgUrls: RSISImage[],
     isLoaddedImg: boolean,
     isSlideMode: boolean,
 }
@@ -45,7 +40,6 @@ class SheetView extends Component<IProps, IStates>{
             this.state = {
                 key: this.props.match.params.key,
                 sheet: null,
-                imgUrls: [],
                 isLoaddedImg: false,
                 isSlideMode: true,
             }
@@ -54,7 +48,6 @@ class SheetView extends Component<IProps, IStates>{
             this.state = {
                 key: '',
                 sheet: null,
-                imgUrls: [],
                 isLoaddedImg: false,
                 isSlideMode: true,
             }
@@ -77,20 +70,9 @@ class SheetView extends Component<IProps, IStates>{
                         tags: datas.tags,
                         metadata: datas.metadata,
                     }
-            
-                    const urls: RSISImage[] = [];
-
-                    _sheet.images.map((image) => {
-                        const url: RSISImage = {
-                            url: image.fileUrl
-                        }
-
-                        urls.push(url);
-                    })
 
                     this.setState({
                         sheet: _sheet,
-                        imgUrls: urls,
                         isLoaddedImg: true,
                     });
                 });
@@ -105,29 +87,7 @@ class SheetView extends Component<IProps, IStates>{
 
     render(){
         const { classes } = this.props;
-        const { sheet, imgUrls, isSlideMode, isLoaddedImg } = this.state;
-
-        let view = undefined;
-        if (sheet && isLoaddedImg) {
-            if (isSlideMode) {
-                view = (
-                    <SimpleImageSlider
-                        width={486}
-                        height={252}
-                        images={imgUrls}>
-                    </SimpleImageSlider>
-                );
-            }
-            else {
-                view = (
-                    sheet.images.map((image, index) => (
-                        <div key={index}>
-                            <img id={image.idx.toString()} src={image.fileUrl} alt={image.fileName} width="100%" height="auto"/>
-                            <Typography>{image.fileName}</Typography>
-                        </div>
-                )));
-            }
-        }
+        const { sheet, isSlideMode, isLoaddedImg } = this.state;
 
         return(
             <div>
@@ -141,18 +101,9 @@ class SheetView extends Component<IProps, IStates>{
                         <Typography>Singer : {sheet.singer}</Typography>
                         <Typography>Remark1 : {sheet.remark1}</Typography>
                         <Typography>Reference Path : {sheet.refPath} <a href={sheet.refPath} target="_blank" rel="noopener noreferrer">> move</a></Typography>
-                        <FormControlLabel
-                            control={
-                            <Switch
-                                checked={isSlideMode}
-                                onChange={this.handleModeSwitch}
-                                value="slide"
-                                color="primary"
-                            />
-                            }
-                            label="Slide Mode"
-                        />
-                        {view}
+                        <SheetImgPreview
+                            imgs={sheet.images}>
+                        </SheetImgPreview>
                     </div>
                     : <CircularProgress/>
                 }

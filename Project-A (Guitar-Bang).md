@@ -59,7 +59,14 @@ $npm run start
 ### image-slider
 
 - ```
-  $npm i react-simple-image-slider
+  $npm i react-image-gallery
+  $npm i @type/react-image-gallery
+  ```
+
+### Sass
+
+- ```
+  $npm i node-sass
   ```
 
 
