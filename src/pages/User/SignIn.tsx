@@ -36,7 +36,7 @@ interface IState{
     password: string,
 }
 
-class SignUp extends Component<IProps, IState> {
+class SignIn extends Component<IProps, IState> {
 
     constructor(props: IProps) {
         super(props);
@@ -46,6 +46,12 @@ class SignUp extends Component<IProps, IState> {
             password: '',
         }
     }
+
+    // define ref zone start
+    refEmail: any = '';
+    refPassword: any = '';
+    refSignIn: any = '';
+    // define ref zone end
 
     checkValidate = () => {
         if (this.state.email === '') {
@@ -67,10 +73,23 @@ class SignUp extends Component<IProps, IState> {
         });
     }
 
+    handleKeyUpEmail = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            this.refPassword.focus();
+        }
+    }
+
     handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({
             password: e.target.value,
         });
+    }
+
+    handleKeyUpPassword = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            this.refSignIn.focus();
+            this.handleSignUp();
+        }
     }
 
     handleSignUp = () => {
@@ -94,8 +113,12 @@ class SignUp extends Component<IProps, IState> {
             .catch((err) => {
                 alert(err.message);
                 console.log('login failed', err);
+                
+                this.refPassword.focus();
             });
     }
+
+    
 
     render() {
         const { classes } = this.props;
@@ -125,6 +148,8 @@ class SignUp extends Component<IProps, IState> {
                                     autoComplete="email"
                                     value={email}
                                     onChange={this.handleChangeEmail}
+                                    onKeyUp={this.handleKeyUpEmail}
+                                    inputRef={ref => this.refEmail = ref}
                                 />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -139,6 +164,8 @@ class SignUp extends Component<IProps, IState> {
                                     autoComplete="current-password"
                                     value={password}
                                     onChange={this.handleChangePassword}
+                                    onKeyUp={this.handleKeyUpPassword}
+                                    inputRef={ref => this.refPassword = ref}
                                 />
                                 </Grid>
                             </Grid>
@@ -149,6 +176,7 @@ class SignUp extends Component<IProps, IState> {
                                 variant="contained"
                                 color="primary"
                                 onClick={this.handleSignUp}
+                                buttonRef={ref => this.refSignIn = ref}
                             >
                                 Sign In
                             </Button>
@@ -161,4 +189,4 @@ class SignUp extends Component<IProps, IState> {
     }
 }
 
-export default withStyles(styles)(SignUp);
+export default withStyles(styles)(SignIn);
