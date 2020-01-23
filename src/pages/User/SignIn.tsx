@@ -105,6 +105,8 @@ class SignIn extends Component<IProps, IState> {
                         
                     })
                 );
+
+                console.log("User Info : ", localStorage.getItem("userInfo"));
             })
             .then(() => {
                 alert("Login Successed!!!");

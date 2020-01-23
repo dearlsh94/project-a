@@ -30,6 +30,7 @@ let config: IConfig;
  * addSheetCount : DB Sheet 생성 시 config의 전체 sheet count 증가 후 해당 idx 반환
  * upImgSheet : DB Sheet 생성 시 이미지 storage로 업로드
  * delImgByIdx : 특정 Sheet IDX 에 저장 된 Stoarge 이미지 삭제
+ * getUserInfo : 로그인한 사용자 Email 주소로 저장 된 사용자 정보 조회
  * 
  */
 
@@ -380,6 +381,13 @@ export const sendEmailVerification = () => {
             });
     }
 }
+
+const getUserInfo = (email: string) => {
+    return new Promise((resolve, reject) => {
+        
+    })
+}
+
 /*
 export const deleteItem = (key) => {
     return new Promise((resolve, reject) => {
